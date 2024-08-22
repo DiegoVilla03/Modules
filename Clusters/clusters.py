@@ -7,48 +7,55 @@ import seaborn as sns
 
 class generate_clusters:
     ''' 
-    Clase para generar y visualizar muestras de distribuciones normales multivariadas en n dimensiones. 
+    Clase para generar y visualizar muestras de distribuciones normales multivariadas, 
+    exponenciales o uniformes en n dimensiones. 
     '''
 
-    def __init__(self, means, covariances, samples):
+    def __init__(self):
         """
-        Inicializa la clase con los diccionarios de medias, covarianzas y tamaños de muestra.
-        
-        Parámetros:
-        - means: Diccionario donde las claves son los nombres de los grupos y los valores son las medias (listas).
-        - covariances: Diccionario donde las claves son los nombres de los grupos y los valores son las matrices de covarianza.
-        - samples: Diccionario donde las claves son los nombres de los grupos y los valores son los tamaños de muestra.
+        Inicializa la clase.
         """
-        self.means = means
-        self.covariances = covariances
-        self.samples = samples
         self.dist = {}           # Diccionario con etiquetas
         self.dist_no_labels = []  # Lista sin etiquetas
-        self.df = None            # DataFrame para los datos con etiquetas
+        self.df = None  # DataFrame para los datos con etiquetas
 
-    def generate_samples(self):
+    @classmethod
+    def from_multivariate_normal(cls, means, covariances, sample_sizes):
         """
-        Genera muestras aleatorias de las distribuciones normales multivariadas basadas en las medias y covarianzas proporcionadas.
-        Los datos se almacenan tanto etiquetados como sin etiquetas, y también se guardan en un DataFrame.
+        Genera puntos utilizando la distribución normal multivariada.
+        
+        Parámetros:
+        - means: Diccionario de medias, donde cada media es un vector de n dimensiones.
+        - covariances: Diccionario de matrices de covarianza, cada una correspondiente a las medias.
+        - sample_sizes: Diccionario de enteros, cada uno correspondiente al número de puntos a generar para cada media.
+        
+        Retorna:
+        - Una instancia de la clase `generate_clusters` con las muestras generadas.
         """
         try:
+            instance = cls()
             data = []
-            for key in self.means.keys():
-                mean = self.means[key]
-                covariance = self.covariances[key]
-                num_samples = int(self.samples[key])
+
+            for key in means.keys():
+                mean = means[key]
+                covariance = covariances[key]
+                num_samples = int(sample_sizes[key])
                 samples = np.random.multivariate_normal(mean=mean, cov=covariance, size=num_samples)
-                self.dist[key] = samples
-                self.dist_no_labels.append(samples)
+                instance.dist[key] = samples
+                instance.dist_no_labels.append(samples)
                 labeled_samples = np.hstack([samples, np.full((num_samples, 1), key)])
                 data.append(labeled_samples)
 
-            self.dist_no_labels = np.vstack(self.dist_no_labels)
+            instance.dist_no_labels = np.vstack(instance.dist_no_labels)
             data = np.vstack(data)
             columns = [f'Dim_{j+1}' for j in range(data.shape[1] - 1)] + ['Group']
-            self.df = pd.DataFrame(data, columns=columns)
+            instance.df = pd.DataFrame(data, columns=columns)
+            
+            return instance
         except Exception as e:
             print(f"Error generating samples: {e}")
+            return None
+
 
     def plot_2d(self, labels=False):
         """
@@ -233,3 +240,17 @@ class generate_clusters:
         except Exception as e:
             print(f"Error generating DataFrame: {e}")
             return None
+        
+    @property
+    def get_points(self):
+        """Devuelve el número de puntos."""
+        if self.df is not None:
+            return print(self.df.shape[0])
+        return 0
+
+    @property
+    def get_dimensions(self):
+        """Devuelve la dimensión de los puntos."""
+        if self.df is not None:
+            return print(self.df.shape[1]-1)
+        return 0
