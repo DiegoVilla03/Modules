@@ -117,3 +117,37 @@ class NeuralNetwork:
         """
         self.activation_function = activation_function
 
+class logic_and(NeuralNetwork):
+    
+    def __init__(self) -> None:
+        super().__init__(np.array([2, 1])) 
+        weights = {(0, 2): 1, (1, 2): 1}  
+        self.weights(weights) 
+
+        thresholds = {2: 2}
+        self.thresholds(thresholds) 
+        self.set_activation_function(lambda x: 1 if x >= 0 else 0)
+        
+
+class logic_or(NeuralNetwork):
+    
+    def __init__(self):
+        super().__init__(np.array([2,1]))
+        weights = {(0,2): 1, (1,2): 1}
+        self.weights(weights)
+        
+        thresholds = {2:1}
+        self.thresholds(thresholds)
+        self.set_activation_function(lambda x:1 if x >= 0 else 0)
+        
+
+class logic_not(NeuralNetwork):
+    
+    def __init__(self):
+        super().__init__(np.array([1,1]))
+        weights = {(0,1): -1}
+        self.weights(weights)
+        
+        thresholds = {1:-0.5}
+        self.thresholds(thresholds)
+        self.set_activation_function(lambda x:1 if x >= 0 else 0)
