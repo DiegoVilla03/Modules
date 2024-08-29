@@ -254,3 +254,88 @@ class generate_clusters:
         if self.df is not None:
             return print(self.df.shape[1]-1)
         return 0
+
+####################################################################################################
+
+####################################################################################################
+    def distance_point_to_all(self, point, metric = 'euclidean'):
+        """
+        Calcula la distancia desde un punto dado a todos los puntos en la clase.
+        
+        Parámetros:
+        - point: Lista o array que representa un punto en el espacio.
+
+        Retorna:
+        - Un array de distancias.
+        """
+        try:
+            return cdist([point], self.dist_no_labels, metric=metric)[0]
+        except Exception as e:
+            print(f"Error calculating distance from point to all: {e}")
+            return None
+
+    def distance_point_to_subset(self, point, subset_indices, metric = 'euclidean', measure = 'avg'):
+        """
+        Calcula la distancia desde un punto dado a un subconjunto de puntos.
+        
+        Parámetros:
+        - point: Lista o array que representa un punto en el espacio de n dimensiones.
+        - subset_indices: Lista de índices que indican el subconjunto de puntos en self.dist_no_labels.
+
+        Retorna:
+        - Un array de distancias.
+        """
+        try:
+            subset = self.dist_no_labels[subset_indices]
+            distance = cdist([point], subset, metric=metric)
+        except Exception as e:
+            print(f"Error calculating distance from point to subset: {e}")
+            return None
+        
+        try:
+            if measure =='avg':
+                return np.average(distance)
+            
+            elif measure == 'max':
+                return np.max(distance)
+            
+            elif measure == 'min':
+                return np.min(distance)
+        
+        except Exception as e:
+            print(f"Not valid proximity measure try 'avg', 'min', 'max' {e}")
+            return None
+        
+
+    def distance_between_subsets(self, subset1_indices, subset2_indices, metric = 'euclidean', measure = 'avg'):
+        """
+        Calcula la distancia entre dos subconjuntos de puntos.
+        
+        Parámetros:
+        - subset1_indices: Lista de índices que indican el primer subconjunto en self.dist_no_labels.
+        - subset2_indices: Lista de índices que indican el segundo subconjunto en self.dist_no_labels.
+
+        Retorna:
+        - Una matriz de distancias.
+        """
+        try:
+            subset1 = self.dist_no_labels[subset1_indices]
+            subset2 = self.dist_no_labels[subset2_indices]
+            distance = cdist(subset1, subset2, metric=metric)
+        except Exception as e:
+            print(f"Error calculating distance between subsets: {e}")
+            return None
+        
+        try:
+            if measure =='avg':
+                return np.average(distance)
+            
+            elif measure == 'max':
+                return np.max(distance)
+            
+            elif measure == 'min':
+                return np.min(distance)
+        
+        except Exception as e:
+            print(f"Not valid proximity measure try 'avg', 'min', 'max' {e}")
+            return None
