@@ -4,6 +4,9 @@ import plotly.graph_objs as go
 import plotly.express as px
 import pandas as pd
 import seaborn as sns
+from scipy.spatial.distance import cdist
+from scipy.spatial.distance import pdist
+from scipy.linalg import norm
 
 class generate_clusters:
     ''' 
