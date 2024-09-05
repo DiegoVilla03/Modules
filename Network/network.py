@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+from numpy.core.multiarray import array as array
 
 
 class NeuralNetwork:
@@ -116,6 +117,55 @@ class NeuralNetwork:
         :param activation_function: Una función que toma una entrada y devuelve una salida (e.g., función sigmoide).
         """
         self.activation_function = activation_function
+
+    def evaluate(self, input_data):
+        """
+        Calcula la salida de la red neuronal dado un conjunto de entradas.
+        :param input_data: Una lista o tupla de valores de entrada.
+        :return: Una lista con los valores de salida de las neuronas de salida.
+        """
+        # Convertir la entrada en un array de numpy si no lo es
+        if not isinstance(input_data, np.ndarray):
+            input_data = np.array(input_data)
+        
+        # Asegurar que input_data tenga la dimensión correcta
+        input_layer_size = self.layers[0]
+        if input_data.shape[0] != input_layer_size:
+            raise ValueError(f"Se esperaban {input_layer_size} entradas, pero se recibieron {input_data.shape[0]}.")
+
+        # Diccionario para almacenar los valores de salida de cada neurona
+        outputs = {}
+
+        # Asignar las entradas a las neuronas de la capa de entrada
+        for i in range(input_layer_size):
+            outputs[i] = input_data[i]
+
+        # Recorrer cada capa, excepto la capa de entrada
+        for layer_index in range(1, len(self.layers)):
+            current_layer_nodes = [node for node, attr in self.graph.nodes(data=True) if attr['subset'] == layer_index]
+
+            # Calcular la salida de cada neurona en la capa actual
+            for node in current_layer_nodes:
+                weighted_sum = 0
+
+                # Calcular la suma ponderada de todas las entradas a esta neurona
+                for predecessor in self.graph.predecessors(node):
+                    weight = self.graph[predecessor][node].get('weight', 0)
+                    weighted_sum += outputs[predecessor] * weight
+
+                # Restar el umbral de la neurona actual
+                threshold = self.graph.nodes[node].get('threshold', 0)
+                weighted_sum -= threshold
+
+                # Aplicar la función de activación
+                outputs[node] = self.activation_function(weighted_sum)
+
+        # Extraer los valores de salida de las neuronas de la última capa
+        output_layer_nodes = [node for node, attr in self.graph.nodes(data=True) if attr['subset'] == len(self.layers) - 1]
+        final_outputs = np.array([outputs[node] for node in output_layer_nodes])
+
+        return final_outputs
+
 
 class logic_and(NeuralNetwork):
     
